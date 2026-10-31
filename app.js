@@ -1,19 +1,17 @@
-// Rodinná kuchařka – logika stránky (seznam, filtr, hledání, detail)
+// Rodinná kuchařka – logika stránky (seznam, filtr, hledání, detail, poznámky)
 
 const KATEGORIE = ["Vše", "Polévky", "Hlavní jídla", "Přílohy a saláty", "Dezerty"];
-const TRIDA_KATEGORIE = {
-  "Polévky": "k-polevky",
-  "Hlavní jídla": "k-hlavni",
-  "Přílohy a saláty": "k-prilohy",
-  "Dezerty": "k-dezerty"
-};
 
 const stav = { kategorie: "Vše", dotaz: "" };
 const obsah = document.getElementById("obsah");
 
-// Odstraní diakritiku a velká písmena, aby "mrkev" našlo i "Mrkve"
+const IKONA_HLEDANI = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
+
+/* ---------- Pomocné funkce ---------- */
+
+// Odstraní diakritiku a velká písmena
 function normalizuj(text) {
-  return text.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 }
 
 function escapuj(text) {
@@ -32,16 +30,30 @@ function formatPorce(n) {
   return `${n} porcí`;
 }
 
-function fotka(recept) {
-  if (recept.foto) {
-    return `<img class="foto" src="${escapuj(recept.foto)}" alt="${escapuj(recept.nazev)}" loading="lazy">`;
-  }
-  const trida = TRIDA_KATEGORIE[recept.kategorie] || "k-jine";
-  return `<div class="foto-nahrada ${trida}">${escapuj(recept.nazev.charAt(0))}</div>`;
+// foto může být text ("images/x.jpg") nebo objekt { url, zdroj } z Wikimedia Commons
+function fotoUrl(r) { return typeof r.foto === "string" ? r.foto : (r.foto && r.foto.url) || ""; }
+function fotoZdroj(r) { return typeof r.foto === "object" && r.foto ? r.foto.zdroj : ""; }
+
+function obrazek(r, lazy = true) {
+  const url = fotoUrl(r);
+  const nahrada = `<div class="nahrada" aria-hidden="true">${escapuj(r.nazev.charAt(0))}</div>`;
+  if (!url) return nahrada;
+  return `<img src="${escapuj(url)}" alt="${escapuj(r.nazev)}" data-pismeno="${escapuj(r.nazev.charAt(0))}" ${lazy ? 'loading="lazy"' : ""}>`;
 }
 
-// Z hledaného slova udělá "kmen" (bez posledních písmen), aby "mrkev" našlo i "mrkve"
-// a "česnek" i "česneku"
+// Když se fotka nenačte, nahradí se dlaždicí s počátečním písmenem
+document.addEventListener("error", e => {
+  const img = e.target;
+  if (img.tagName !== "IMG" || !img.dataset.pismeno) return;
+  const div = document.createElement("div");
+  div.className = "nahrada";
+  div.textContent = img.dataset.pismeno;
+  img.replaceWith(div);
+}, true);
+
+/* ---------- Hledání ---------- */
+
+// Ze slova udělá "kmen", aby "mrkev" našlo i "mrkve" a "česnek" i "česneku"
 function kmeny(dotaz) {
   return normalizuj(dotaz).split(/\s+/).filter(Boolean)
     .map(s => s.length >= 5 ? s.slice(0, Math.max(3, s.length - 2)) : s.length === 4 ? s.slice(0, 3) : s);
@@ -52,22 +64,21 @@ function obsahuje(text, kmen) {
   return normalizuj(text).split(/[^a-z0-9]+/).some(slovo => slovo.startsWith(kmen));
 }
 
-function odpovidaDotazu(recept, dotaz) {
+function odpovidaDotazu(r, dotaz) {
   if (!dotaz) return true;
-  const text = [recept.nazev, ...recept.suroviny].join(" ");
+  const text = [r.nazev, ...r.suroviny].join(" ");
   return kmeny(dotaz).every(k => obsahuje(text, k));
 }
 
-function najdiSurovinu(recept, dotaz) {
+function najdiSurovinu(r, dotaz) {
   if (!dotaz) return null;
-  const slova = kmeny(dotaz);
-  return recept.suroviny.find(s => slova.some(k => obsahuje(s, k))) || null;
+  const k = kmeny(dotaz);
+  return r.suroviny.find(s => k.some(x => obsahuje(s, x))) || null;
 }
 
 function filtrovane() {
   return RECEPTY.filter(r =>
-    (stav.kategorie === "Vše" || r.kategorie === stav.kategorie) &&
-    odpovidaDotazu(r, stav.dotaz)
+    (stav.kategorie === "Vše" || r.kategorie === stav.kategorie) && odpovidaDotazu(r, stav.dotaz)
   );
 }
 
@@ -76,22 +87,29 @@ function filtrovane() {
 function vykresliSeznam() {
   document.title = "Rodinná kuchařka";
   obsah.innerHTML = `
-    <div class="ovladani">
-      <input class="hledani" type="search" placeholder="Hledej podle názvu nebo suroviny (např. mrkev, česnek)…" value="${escapuj(stav.dotaz)}" aria-label="Hledat">
-      <div class="kategorie">
-        ${KATEGORIE.map(k => `<button data-k="${k}" class="${k === stav.kategorie ? "aktivni" : ""}">${k}</button>`).join("")}
+    <header class="uvod">
+      <h1>Rodinná kuchařka</h1>
+      <p>Naše osvědčené recepty na jednom místě. Hledej podle názvu nebo podle toho, co máš doma.</p>
+      <div class="hledani-obal">
+        ${IKONA_HLEDANI}
+        <input class="hledani" type="search" placeholder="Např. svíčková, mrkev, česnek…" value="${escapuj(stav.dotaz)}" aria-label="Hledat recept nebo surovinu">
       </div>
-    </div>
-    <div class="mrizka" id="mrizka"></div>
+      <div class="kategorie" role="group" aria-label="Kategorie">
+        ${KATEGORIE.map(k => {
+          const pocet = k === "Vše" ? RECEPTY.length : RECEPTY.filter(r => r.kategorie === k).length;
+          return `<button type="button" data-k="${k}" aria-pressed="${k === stav.kategorie}">${k}<span class="pocet">${pocet}</span></button>`;
+        }).join("")}
+      </div>
+    </header>
+    <section class="mrizka" id="mrizka" aria-live="polite"></section>
   `;
 
-  const pole = obsah.querySelector(".hledani");
-  pole.addEventListener("input", e => { stav.dotaz = e.target.value; vykresliKarty(); });
+  obsah.querySelector(".hledani").addEventListener("input", e => { stav.dotaz = e.target.value; vykresliKarty(); });
 
   obsah.querySelectorAll(".kategorie button").forEach(b => {
     b.addEventListener("click", () => {
       stav.kategorie = b.dataset.k;
-      obsah.querySelectorAll(".kategorie button").forEach(x => x.classList.toggle("aktivni", x === b));
+      obsah.querySelectorAll(".kategorie button").forEach(x => x.setAttribute("aria-pressed", x === b));
       vykresliKarty();
     });
   });
@@ -103,22 +121,24 @@ function vykresliKarty() {
   const mrizka = document.getElementById("mrizka");
   const seznam = filtrovane();
   if (!seznam.length) {
-    mrizka.innerHTML = `<p class="prazdno">Nic jsme nenašli. Zkus jiné slovo nebo kategorii.</p>`;
+    mrizka.innerHTML = `<div class="prazdno">
+      <p>Žádný recept neodpovídá hledání „${escapuj(stav.dotaz)}“${stav.kategorie !== "Vše" ? ` v kategorii ${escapuj(stav.kategorie)}` : ""}.</p>
+      <button type="button" id="zrusit">Zobrazit všechny recepty</button></div>`;
+    document.getElementById("zrusit").addEventListener("click", () => {
+      stav.dotaz = ""; stav.kategorie = "Vše"; vykresliSeznam();
+    });
     return;
   }
   mrizka.innerHTML = seznam.map(r => {
     const surovina = najdiSurovinu(r, stav.dotaz);
     const shoda = surovina && !kmeny(stav.dotaz).every(k => obsahuje(r.nazev, k))
-      ? `<div class="meta">obsahuje: ${escapuj(surovina)}</div>` : "";
+      ? `<div class="shoda">Obsahuje: ${escapuj(surovina)}</div>` : "";
     return `
-      <a class="karta" href="#recept/${encodeURIComponent(r.id)}">
-        ${fotka(r)}
-        <div class="info">
-          <span class="stitek">${escapuj(r.kategorie)}</span>
-          <h3>${escapuj(r.nazev)}</h3>
-          <div class="meta">⏱ ${formatCas(r.cas)} · ${formatPorce(r.porce)}</div>
-          ${shoda}
-        </div>
+      <a class="recept" href="#recept/${encodeURIComponent(r.id)}">
+        <div class="obrazek">${obrazek(r)}</div>
+        <h2>${escapuj(r.nazev)}</h2>
+        <div class="udaje"><span>${escapuj(r.kategorie)}</span><span>${formatCas(r.cas)}</span><span>${formatPorce(r.porce)}</span></div>
+        ${shoda}
       </a>`;
   }).join("");
 }
@@ -126,53 +146,55 @@ function vykresliKarty() {
 /* ---------- Detail ---------- */
 
 function klicPoznamky(id) { return `poznamka-${id}`; }
-
-function nactiPoznamku(id) {
-  try { return localStorage.getItem(klicPoznamky(id)) || ""; } catch { return ""; }
-}
-function ulozPoznamku(id, text) {
-  try { localStorage.setItem(klicPoznamky(id), text); return true; } catch { return false; }
-}
+function nactiPoznamku(id) { try { return localStorage.getItem(klicPoznamky(id)) || ""; } catch { return ""; } }
+function ulozPoznamku(id, text) { try { localStorage.setItem(klicPoznamky(id), text); return true; } catch { return false; } }
 
 function vykresliDetail(id) {
   const r = RECEPTY.find(x => x.id === id);
   if (!r) {
-    obsah.innerHTML = `<a class="zpet" href="#">← Zpět na recepty</a><p class="prazdno">Recept nebyl nalezen.</p>`;
+    obsah.innerHTML = `<a class="zpet" href="#">← Všechny recepty</a><p class="prazdno">Tento recept v kuchařce není.</p>`;
     return;
   }
   document.title = `${r.nazev} – Rodinná kuchařka`;
+  const zdroj = fotoZdroj(r);
+
   obsah.innerHTML = `
-    <a class="zpet" href="#">← Zpět na recepty</a>
-    <article class="detail">
-      ${fotka(r)}
-      <div class="detail-telo">
-        <span class="stitek">${escapuj(r.kategorie)}</span>
-        <h1>${escapuj(r.nazev)}</h1>
-        <div class="fakta">
-          <span>⏱ ${formatCas(r.cas)}</span>
-          <span>🍽 ${formatPorce(r.porce)}</span>
-        </div>
-        <div class="sloupce">
-          <section>
-            <h2>Suroviny</h2>
-            <ul class="suroviny">${r.suroviny.map(s => `<li>${escapuj(s)}</li>`).join("")}</ul>
-          </section>
-          <section>
-            <h2>Postup</h2>
-            <ol class="postup">${r.postup.map(k => `<li>${escapuj(k)}</li>`).join("")}</ol>
-          </section>
-        </div>
-        <section>
+    <a class="zpet" href="#">← Všechny recepty</a>
+    <div class="detail-obrazek">${obrazek(r, false)}</div>
+    ${zdroj ? `<p class="autor-foto">Foto: <a href="${escapuj(zdroj)}" target="_blank" rel="noopener">Wikimedia Commons – autor a licence</a></p>` : ""}
+
+    <header class="hlavicka-receptu">
+      <a class="kat" href="#" data-kat="${escapuj(r.kategorie)}">${escapuj(r.kategorie)}</a>
+      <h1>${escapuj(r.nazev)}</h1>
+      <ul class="fakta">
+        <li><span>Příprava</span>${formatCas(r.cas)}</li>
+        <li><span>Množství</span>${formatPorce(r.porce)}</li>
+      </ul>
+    </header>
+
+    <div class="telo-receptu">
+      <aside class="suroviny-panel">
+        <h2>Suroviny</h2>
+        <ul class="suroviny">${r.suroviny.map(s => `<li>${escapuj(s)}</li>`).join("")}</ul>
+      </aside>
+      <div>
+        <h2>Postup</h2>
+        <ol class="postup">${r.postup.map(k => `<li><span>${escapuj(k)}</span></li>`).join("")}</ol>
+
+        <section class="poznamky">
           <h2>Poznámky</h2>
           ${r.poznamky ? `<p class="poznamka-recept">${escapuj(r.poznamky)}</p>` : ""}
           <div class="moje-poznamky">
-            <textarea id="moje" placeholder="Tvoje poznámky – např. příště méně soli, přidat víc česneku…">${escapuj(nactiPoznamku(r.id))}</textarea>
-            <p class="napoveda" id="stav-ulozeni">Vlastní poznámky se ukládají automaticky v tomto prohlížeči.</p>
+            <label for="moje" class="napoveda">Tvoje poznámky (ukládají se jen v tomto prohlížeči)</label>
+            <textarea id="moje" placeholder="Třeba: příště méně soli, víc česneku…">${escapuj(nactiPoznamku(r.id))}</textarea>
+            <p class="napoveda" id="stav-ulozeni" aria-live="polite"></p>
           </div>
         </section>
       </div>
-    </article>
+    </div>
   `;
+
+  obsah.querySelector(".kat").addEventListener("click", () => { stav.kategorie = r.kategorie; stav.dotaz = ""; });
 
   const pole = document.getElementById("moje");
   const info = document.getElementById("stav-ulozeni");
@@ -181,8 +203,8 @@ function vykresliDetail(id) {
     clearTimeout(casovac);
     casovac = setTimeout(() => {
       info.textContent = ulozPoznamku(r.id, pole.value)
-        ? "Uloženo ✓ (v tomto prohlížeči)"
-        : "Poznámku se nepodařilo uložit – prohlížeč ukládání nepovoluje.";
+        ? "Uloženo"
+        : "Poznámku nejde uložit: prohlížeč nepovoluje ukládání.";
     }, 400);
   });
   window.scrollTo(0, 0);

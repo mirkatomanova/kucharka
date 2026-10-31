@@ -1,3 +1,13 @@
+// Demonstrační fotky z Wikimedia Commons (volná licence, autor je uveden u receptu).
+// Vlastní fotku dáš do složky images/ a napíšeš např. foto: "images/gulas.jpg"
+function commons(soubor) {
+  const jmeno = soubor.replace(/ /g, "_");
+  return {
+    url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(jmeno) + "?width=1200",
+    zdroj: "https://commons.wikimedia.org/wiki/File:" + encodeURIComponent(jmeno)
+  };
+}
+
 // Všechny recepty. Nový recept přidáš zkopírováním jednoho bloku { ... }.
 // foto: cesta k obrázku ve složce images/ (když chybí, zobrazí se barevná dlaždice)
 // cas: čas přípravy v minutách
@@ -6,7 +16,7 @@ const RECEPTY = [
     id: "cesnecka",
     nazev: "Česnečka s krutony",
     kategorie: "Polévky",
-    foto: "",
+    foto: commons("Domácí česnečka.jpg"),
     cas: 25,
     porce: 4,
     suroviny: [
@@ -33,7 +43,7 @@ const RECEPTY = [
     id: "vyvar",
     nazev: "Hovězí vývar s nudlemi",
     kategorie: "Polévky",
-    foto: "",
+    foto: commons("Rindssuppe mit Nudeln.jpg"),
     cas: 180,
     porce: 6,
     suroviny: [
@@ -62,7 +72,7 @@ const RECEPTY = [
     id: "dynova",
     nazev: "Dýňová krémová polévka",
     kategorie: "Polévky",
-    foto: "",
+    foto: commons("Kürbissuppe mit Kernöl.JPG"),
     cas: 40,
     porce: 4,
     suroviny: [
@@ -88,7 +98,7 @@ const RECEPTY = [
     id: "svickova",
     nazev: "Svíčková na smetaně",
     kategorie: "Hlavní jídla",
-    foto: "",
+    foto: commons("Praha 2005-09-25 svíčková na smetaně-00.jpg"),
     cas: 180,
     porce: 4,
     suroviny: [
@@ -120,7 +130,7 @@ const RECEPTY = [
     id: "kari",
     nazev: "Kuřecí kari s rýží",
     kategorie: "Hlavní jídla",
-    foto: "",
+    foto: commons("Chicken Curry Rice.jpg"),
     cas: 35,
     porce: 4,
     suroviny: [
@@ -148,7 +158,7 @@ const RECEPTY = [
     id: "aglio-olio",
     nazev: "Špagety aglio e olio",
     kategorie: "Hlavní jídla",
-    foto: "",
+    foto: commons("Aglio e olio.jpg"),
     cas: 20,
     porce: 2,
     suroviny: [
@@ -172,7 +182,7 @@ const RECEPTY = [
     id: "bramborovy-salat",
     nazev: "Bramborový salát",
     kategorie: "Přílohy a saláty",
-    foto: "",
+    foto: commons("Bramborový salát.JPG"),
     cas: 45,
     porce: 6,
     suroviny: [
@@ -201,7 +211,7 @@ const RECEPTY = [
     id: "strudl",
     nazev: "Jablečný štrúdl",
     kategorie: "Dezerty",
-    foto: "",
+    foto: commons("Strudel.jpg"),
     cas: 60,
     porce: 8,
     suroviny: [
@@ -228,7 +238,7 @@ const RECEPTY = [
     id: "babovka",
     nazev: "Bábovka",
     kategorie: "Dezerty",
-    foto: "",
+    foto: commons("Marmorkuchen-Minigugelhupf angeschnitten 2022 (cropped).jpg"),
     cas: 70,
     porce: 10,
     suroviny: [

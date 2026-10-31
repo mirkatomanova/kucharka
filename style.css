@@ -1,128 +1,215 @@
+/* Rodinná kuchařka – moderní, vzdušný vzhled */
 :root {
-  --pozadi: #faf6ef;
-  --karta: #ffffff;
-  --text: #2b2420;
-  --tlumeny: #7a6e66;
-  --akcent: #b5532f;
-  --linka: #e8dfd3;
-  --radius: 14px;
+  --bila: #ffffff;
+  --inkoust: #1c2a22;      /* hlavní text, tmavá zelenočerná */
+  --bylinka: #2f6b4f;      /* akcent – zelená bylinek */
+  --salvej: #eef3ef;       /* jemný podklad panelů */
+  --tlumena: #66736b;      /* vedlejší text */
+  --linka: #e1e7e2;
+  --zaobleni: 20px;
+  --pismo-nadpis: "Bricolage Grotesque", system-ui, sans-serif;
+  --pismo: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  background: var(--pozadi);
-  color: var(--text);
-  line-height: 1.55;
+  background: var(--bila);
+  color: var(--inkoust);
+  font-family: var(--pismo);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-.hlavicka {
-  padding: 22px 24px;
-  border-bottom: 1px solid var(--linka);
-  background: var(--karta);
-}
-.logo {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.6rem;
-  color: var(--akcent);
-  text-decoration: none;
-  font-weight: bold;
-}
+main { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
 
-main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--bylinka); outline-offset: 3px; border-radius: 6px; }
 
-/* Ovládání */
-.ovladani { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+/* ---------- Úvod se seznamem ---------- */
+.uvod { padding: 72px 0 36px; }
+.uvod h1 {
+  font-family: var(--pismo-nadpis);
+  font-weight: 700;
+  font-size: clamp(2.6rem, 7vw, 5.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  margin: 0 0 14px;
+}
+.uvod p { margin: 0 0 36px; color: var(--tlumena); font-size: 1.1rem; max-width: 34em; }
+
+.hledani-obal { position: relative; max-width: 720px; }
+.hledani-obal svg {
+  position: absolute; left: 22px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px; color: var(--tlumena); pointer-events: none;
+}
 .hledani {
   width: 100%;
-  padding: 14px 16px;
-  font-size: 1rem;
-  border: 1px solid var(--linka);
-  border-radius: var(--radius);
-  background: var(--karta);
-}
-.hledani:focus { outline: 2px solid var(--akcent); border-color: transparent; }
-
-.kategorie { display: flex; flex-wrap: wrap; gap: 8px; }
-.kategorie button {
-  padding: 8px 16px;
-  border: 1px solid var(--linka);
+  padding: 20px 24px 20px 58px;
+  font: inherit; font-size: 1.1rem;
+  color: var(--inkoust);
+  background: var(--salvej);
+  border: 2px solid transparent;
   border-radius: 999px;
-  background: var(--karta);
-  color: var(--text);
-  font-size: 0.95rem;
-  cursor: pointer;
+  transition: border-color .15s, background .15s;
 }
-.kategorie button.aktivni { background: var(--akcent); color: #fff; border-color: var(--akcent); }
+.hledani::placeholder { color: var(--tlumena); }
+.hledani:focus { outline: none; background: var(--bila); border-color: var(--bylinka); }
 
-/* Mřížka karet */
+/* Kategorie jako záložky */
+.kategorie {
+  display: flex; flex-wrap: wrap; gap: 6px 28px;
+  margin: 40px 0 0; padding: 0; list-style: none;
+  border-bottom: 1px solid var(--linka);
+}
+.kategorie button {
+  font: inherit; font-weight: 500; font-size: 1rem;
+  color: var(--tlumena);
+  background: none; border: 0; cursor: pointer;
+  padding: 10px 0 14px;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.kategorie button:hover { color: var(--inkoust); }
+.kategorie button[aria-pressed="true"] { color: var(--inkoust); border-bottom-color: var(--bylinka); }
+.kategorie .pocet { color: var(--tlumena); font-weight: 400; margin-left: 4px; }
+
+/* ---------- Mřížka receptů ---------- */
 .mrizka {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 48px 32px;
+  padding: 40px 0 80px;
 }
-.karta {
-  background: var(--karta);
-  border-radius: var(--radius);
+.recept { text-decoration: none; display: block; }
+.recept .obrazek {
+  aspect-ratio: 4 / 3;
+  border-radius: var(--zaobleni);
   overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 1px 3px rgba(60, 40, 20, 0.08);
-  transition: transform 0.15s, box-shadow 0.15s;
+  background: var(--salvej);
 }
-.karta:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(60, 40, 20, 0.12); }
-.karta .info { padding: 14px 16px 18px; }
-.karta h3 { margin: 4px 0 6px; font-family: Georgia, serif; font-size: 1.2rem; }
-.stitek { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--akcent); }
-.meta { font-size: 0.9rem; color: var(--tlumeny); }
+.recept img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.recept .nahrada, .detail-obrazek .nahrada { width: 100%; height: 100%; }
+.recept:hover img { transform: scale(1.03); }
+.recept h2 {
+  font-family: var(--pismo-nadpis);
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 18px 0 6px;
+}
+.recept:hover h2 { color: var(--bylinka); }
+.udaje { display: flex; flex-wrap: wrap; gap: 4px 18px; color: var(--tlumena); font-size: 0.95rem; }
+.shoda { margin-top: 6px; font-size: 0.95rem; color: var(--bylinka); }
 
-/* Fotka nebo náhradní dlaždice */
-.foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
-.foto-nahrada {
-  width: 100%; aspect-ratio: 4 / 3;
+.nahrada {
   display: flex; align-items: center; justify-content: center;
-  font-family: Georgia, serif; font-size: 3rem; color: rgba(255,255,255,0.9);
+  font-family: var(--pismo-nadpis); font-size: 4rem; font-weight: 700;
+  color: var(--bylinka); background: var(--salvej);
 }
-.k-polevky { background: linear-gradient(135deg, #e0a458, #c96f3b); }
-.k-hlavni { background: linear-gradient(135deg, #b5532f, #7d2e1a); }
-.k-prilohy { background: linear-gradient(135deg, #8aa35b, #5b7a3a); }
-.k-dezerty { background: linear-gradient(135deg, #c98bb9, #8e4f7f); }
-.k-jine { background: linear-gradient(135deg, #a89c90, #6f655c); }
 
-.prazdno { color: var(--tlumeny); padding: 40px 0; text-align: center; }
+.prazdno { grid-column: 1 / -1; padding: 60px 0; text-align: center; color: var(--tlumena); }
+.prazdno button {
+  margin-top: 14px; font: inherit; font-weight: 600; color: var(--bylinka);
+  background: none; border: 2px solid var(--bylinka); border-radius: 999px; padding: 10px 22px; cursor: pointer;
+}
 
-/* Detail receptu */
-.zpet { display: inline-block; margin-bottom: 18px; color: var(--akcent); text-decoration: none; }
-.detail { background: var(--karta); border-radius: var(--radius); overflow: hidden; }
-.detail .foto, .detail .foto-nahrada { aspect-ratio: 16 / 7; }
-.detail-telo { padding: 24px 28px 32px; }
-.detail h1 { font-family: Georgia, serif; margin: 6px 0 10px; font-size: 2rem; }
-.fakta { display: flex; gap: 22px; color: var(--tlumeny); margin-bottom: 24px; }
-.sloupce { display: grid; grid-template-columns: 1fr 2fr; gap: 32px; }
-.detail h2 { font-family: Georgia, serif; font-size: 1.25rem; border-bottom: 1px solid var(--linka); padding-bottom: 6px; }
-.suroviny { list-style: none; padding: 0; }
-.suroviny li { padding: 6px 0; border-bottom: 1px dashed var(--linka); }
-.postup { padding-left: 1.3em; }
-.postup li { margin-bottom: 12px; }
-.poznamka-recept { background: #fff7e8; border-left: 3px solid #e0a458; padding: 10px 14px; border-radius: 6px; }
+/* ---------- Detail receptu ---------- */
+.zpet {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 32px 0 24px; font-weight: 500; text-decoration: none; color: var(--tlumena);
+}
+.zpet:hover { color: var(--bylinka); }
+
+.detail-obrazek {
+  aspect-ratio: 21 / 9;
+  border-radius: calc(var(--zaobleni) + 8px);
+  overflow: hidden; background: var(--salvej);
+}
+.detail-obrazek img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.autor-foto { margin: 10px 0 0; font-size: 0.82rem; color: var(--tlumena); }
+.autor-foto a { color: var(--tlumena); }
+
+.hlavicka-receptu { padding: 36px 0 12px; max-width: 820px; }
+.hlavicka-receptu .kat { color: var(--bylinka); font-weight: 600; text-decoration: none; }
+.hlavicka-receptu h1 {
+  font-family: var(--pismo-nadpis);
+  font-weight: 700;
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 10px 0 24px;
+}
+.fakta { display: flex; flex-wrap: wrap; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.fakta li {
+  background: var(--salvej); border-radius: 999px; padding: 8px 18px; font-weight: 500;
+}
+.fakta span { color: var(--tlumena); font-weight: 400; margin-right: 6px; }
+
+.telo-receptu {
+  display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 56px;
+  padding: 40px 0 88px; align-items: start;
+}
+.suroviny-panel {
+  background: var(--salvej); border-radius: var(--zaobleni); padding: 28px 28px 20px;
+  position: sticky; top: 24px;
+}
+.telo-receptu h2 {
+  font-family: var(--pismo-nadpis); font-weight: 700; font-size: 1.5rem;
+  letter-spacing: -0.01em; margin: 0 0 16px;
+}
+.suroviny { list-style: none; margin: 0; padding: 0; }
+.suroviny li { padding: 10px 0; border-top: 1px solid #d8e2da; }
+.suroviny li:first-child { border-top: 0; }
+
+.postup { list-style: none; margin: 0 0 48px; padding: 0; counter-reset: krok; max-width: 40em; }
+.postup li {
+  counter-increment: krok;
+  display: grid; grid-template-columns: 52px 1fr; gap: 8px;
+  padding: 0 0 26px;
+}
+.postup li::before {
+  content: counter(krok);
+  font-family: var(--pismo-nadpis); font-weight: 700; font-size: 1.9rem; line-height: 1.1;
+  color: var(--bylinka);
+}
+
+.poznamky { max-width: 40em; }
+.poznamka-recept {
+  border-left: 4px solid var(--bylinka); padding: 4px 0 4px 18px; margin: 0 0 20px; font-size: 1.05rem;
+}
 textarea {
-  width: 100%; min-height: 110px; padding: 12px;
-  font: inherit; border: 1px solid var(--linka); border-radius: 10px; resize: vertical;
+  width: 100%; min-height: 120px; padding: 16px 18px;
+  font: inherit; color: var(--inkoust);
+  background: var(--salvej); border: 2px solid transparent; border-radius: 16px; resize: vertical;
 }
-.napoveda { font-size: 0.85rem; color: var(--tlumeny); }
-mark { background: #ffe3a3; padding: 0 2px; border-radius: 3px; }
+textarea:focus { outline: none; background: var(--bila); border-color: var(--bylinka); }
+.napoveda { font-size: 0.9rem; color: var(--tlumena); margin: 8px 0 0; }
 
-.paticka { text-align: center; color: var(--tlumeny); font-size: 0.85rem; padding: 30px 0; }
+.paticka {
+  max-width: 1180px; margin: 0 auto; padding: 28px 28px 48px;
+  border-top: 1px solid var(--linka); color: var(--tlumena); font-size: 0.85rem;
+}
 
-@media (max-width: 700px) {
-  .sloupce { grid-template-columns: 1fr; gap: 8px; }
-  .detail-telo { padding: 18px; }
-  .detail h1 { font-size: 1.6rem; }
+/* ---------- Mobil ---------- */
+@media (max-width: 760px) {
+  main { padding: 0 18px; }
+  .uvod { padding-top: 44px; }
+  .mrizka { gap: 36px; }
+  .detail-obrazek { aspect-ratio: 4 / 3; }
+  .telo-receptu { grid-template-columns: 1fr; gap: 40px; }
+  .suroviny-panel { position: static; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
 }
 
 @media print {
-  .hlavicka, .paticka, .zpet, .moje-poznamky { display: none; }
-  body { background: #fff; }
+  .zpet, .paticka, .moje-poznamky, .detail-obrazek, .autor-foto { display: none; }
+  .suroviny-panel { position: static; background: none; padding: 0; }
+  .telo-receptu { grid-template-columns: 1fr 2fr; }
 }
