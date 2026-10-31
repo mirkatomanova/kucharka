@@ -28,4 +28,4 @@ jobs:
           git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
           git add images/*.jpg
           git diff --cached --quiet || git commit -m "Demonstrační fotky z Wikimedia Commons"
-          git push
+          git pull --rebase origin main && git push
