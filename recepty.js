@@ -2,8 +2,10 @@
 // Vlastní fotku dáš do složky images/ a napíšeš např. foto: "images/gulas.jpg"
 function commons(soubor) {
   const jmeno = soubor.replace(/ /g, "_");
+  const mistni = soubor.replace(/\.[^.]+$/, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".jpg";
   return {
-    url: "https://commons.wikimedia.org/wiki/Special:FilePath/" + encodeURIComponent(jmeno) + "?width=1200",
+    url: "images/" + mistni,
     zdroj: "https://commons.wikimedia.org/wiki/File:" + encodeURIComponent(jmeno)
   };
 }
