@@ -184,7 +184,7 @@ const RECEPTY = [
     id: "bramborovy-salat",
     nazev: "Bramborový salát",
     kategorie: "Přílohy a saláty",
-    foto: commons("Bramborový salát.JPG"),
+    foto: commons("Christmas carp with potato salad.jpg"),
     cas: 45,
     porce: 6,
     suroviny: [
