@@ -1,0 +1,31 @@
+name: Stáhnout demonstrační fotky
+on:
+  push:
+    paths: ["images/seznam-fotek.txt", ".github/workflows/fotky.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fotky:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Stáhnout fotky z Wikimedia Commons
+        run: |
+          set -e
+          while IFS='|' read -r soubor cil; do
+            [ -z "$soubor" ] && continue
+            jmeno=$(python3 -c "import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1].replace(' ','_')))" "$soubor")
+            echo "Stahuji $soubor -> images/$cil"
+            curl -fsSL --retry 3 -A "RodinnaKucharka/1.0 (https://github.com/mirkatomanova/kucharka)" \
+              -o "images/$cil" "https://commons.wikimedia.org/wiki/Special:FilePath/$jmeno?width=1280"
+            sleep 2
+          done < images/seznam-fotek.txt
+          ls -la images
+      - name: Uložit fotky do repozitáře
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898333+github-actions[bot]@users.noreply.github.com"
+          git add images/*.jpg
+          git diff --cached --quiet || git commit -m "Demonstrační fotky z Wikimedia Commons"
+          git push
