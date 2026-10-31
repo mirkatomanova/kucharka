@@ -1,0 +1,128 @@
+:root {
+  --pozadi: #faf6ef;
+  --karta: #ffffff;
+  --text: #2b2420;
+  --tlumeny: #7a6e66;
+  --akcent: #b5532f;
+  --linka: #e8dfd3;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--pozadi);
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.hlavicka {
+  padding: 22px 24px;
+  border-bottom: 1px solid var(--linka);
+  background: var(--karta);
+}
+.logo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.6rem;
+  color: var(--akcent);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+
+/* Ovládání */
+.ovladani { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+.hledani {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1rem;
+  border: 1px solid var(--linka);
+  border-radius: var(--radius);
+  background: var(--karta);
+}
+.hledani:focus { outline: 2px solid var(--akcent); border-color: transparent; }
+
+.kategorie { display: flex; flex-wrap: wrap; gap: 8px; }
+.kategorie button {
+  padding: 8px 16px;
+  border: 1px solid var(--linka);
+  border-radius: 999px;
+  background: var(--karta);
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.kategorie button.aktivni { background: var(--akcent); color: #fff; border-color: var(--akcent); }
+
+/* Mřížka karet */
+.mrizka {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+.karta {
+  background: var(--karta);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 3px rgba(60, 40, 20, 0.08);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.karta:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(60, 40, 20, 0.12); }
+.karta .info { padding: 14px 16px 18px; }
+.karta h3 { margin: 4px 0 6px; font-family: Georgia, serif; font-size: 1.2rem; }
+.stitek { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--akcent); }
+.meta { font-size: 0.9rem; color: var(--tlumeny); }
+
+/* Fotka nebo náhradní dlaždice */
+.foto { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.foto-nahrada {
+  width: 100%; aspect-ratio: 4 / 3;
+  display: flex; align-items: center; justify-content: center;
+  font-family: Georgia, serif; font-size: 3rem; color: rgba(255,255,255,0.9);
+}
+.k-polevky { background: linear-gradient(135deg, #e0a458, #c96f3b); }
+.k-hlavni { background: linear-gradient(135deg, #b5532f, #7d2e1a); }
+.k-prilohy { background: linear-gradient(135deg, #8aa35b, #5b7a3a); }
+.k-dezerty { background: linear-gradient(135deg, #c98bb9, #8e4f7f); }
+.k-jine { background: linear-gradient(135deg, #a89c90, #6f655c); }
+
+.prazdno { color: var(--tlumeny); padding: 40px 0; text-align: center; }
+
+/* Detail receptu */
+.zpet { display: inline-block; margin-bottom: 18px; color: var(--akcent); text-decoration: none; }
+.detail { background: var(--karta); border-radius: var(--radius); overflow: hidden; }
+.detail .foto, .detail .foto-nahrada { aspect-ratio: 16 / 7; }
+.detail-telo { padding: 24px 28px 32px; }
+.detail h1 { font-family: Georgia, serif; margin: 6px 0 10px; font-size: 2rem; }
+.fakta { display: flex; gap: 22px; color: var(--tlumeny); margin-bottom: 24px; }
+.sloupce { display: grid; grid-template-columns: 1fr 2fr; gap: 32px; }
+.detail h2 { font-family: Georgia, serif; font-size: 1.25rem; border-bottom: 1px solid var(--linka); padding-bottom: 6px; }
+.suroviny { list-style: none; padding: 0; }
+.suroviny li { padding: 6px 0; border-bottom: 1px dashed var(--linka); }
+.postup { padding-left: 1.3em; }
+.postup li { margin-bottom: 12px; }
+.poznamka-recept { background: #fff7e8; border-left: 3px solid #e0a458; padding: 10px 14px; border-radius: 6px; }
+textarea {
+  width: 100%; min-height: 110px; padding: 12px;
+  font: inherit; border: 1px solid var(--linka); border-radius: 10px; resize: vertical;
+}
+.napoveda { font-size: 0.85rem; color: var(--tlumeny); }
+mark { background: #ffe3a3; padding: 0 2px; border-radius: 3px; }
+
+.paticka { text-align: center; color: var(--tlumeny); font-size: 0.85rem; padding: 30px 0; }
+
+@media (max-width: 700px) {
+  .sloupce { grid-template-columns: 1fr; gap: 8px; }
+  .detail-telo { padding: 18px; }
+  .detail h1 { font-size: 1.6rem; }
+}
+
+@media print {
+  .hlavicka, .paticka, .zpet, .moje-poznamky { display: none; }
+  body { background: #fff; }
+}
